@@ -445,7 +445,7 @@ void Dispatcher::handleResult(Device & d) {
 		result & r = d.m_memResult[i];
 
 		
-		if (i >= m_clScoreMax || i>=10) {
+		if (i >= m_clScoreMax || i>=1) {
 				printResult(d.m_clSeed, d.m_round, r, i, timeStart, m_mode);
 			}
 
