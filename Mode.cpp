@@ -63,7 +63,7 @@ Mode Mode::matching(const std::string strHex) {
 		++index;
 	}
 
-	return r*2;
+	return r * 2;
 }
 
 Mode Mode::leading(const char charLeading) {
