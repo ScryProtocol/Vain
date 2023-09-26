@@ -444,6 +444,12 @@ void Dispatcher::handleResult(Device & d) {
 	for (auto i = PROFANITY_MAX_SCORE; i > m_clScoreMax; --i) {
 		result & r = d.m_memResult[i];
 
+		
+		if (i >= m_clScoreMax || i>=10) {
+				printResult(d.m_clSeed, d.m_round, r, i, timeStart, m_mode);
+			}
+
+		
 		if (r.found > 0 && i >= d.m_clScoreMax) {
 			d.m_clScoreMax = i;
 			CLMemory<cl_uchar>::setKernelArg(d.m_kernelScore, 4, d.m_clScoreMax);
