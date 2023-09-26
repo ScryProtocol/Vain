@@ -99,7 +99,7 @@ static void printResult(cl_ulong4 seed, cl_ulong round, result r, cl_uchar score
 	std::cout << strVT100ClearLine << "  Time: " << std::setw(5) << seconds << "s Score: " << std::setw(2) << (int) score << " Private: 0x" << strPrivate << ' ';
 std::ofstream outFile("output.txt", std::ios::app); // open file in append mode
     if (outFile) {
-        outFile << "\n"<< "  Time: " << std::setw(5) << seconds << "s Score: " << std::setw(2) << (int) score << " Private: 0x" << strPrivate << ' ';
+        outFile << "\n"<< "  Time: " << std::setw(5) << seconds << "s Score: " << std::setw(2) << (int) score << " Private: 0x" << strPrivate << ' '<< mode.transformName() ": 0x" << strPublic << std::endl;
         // ... [any additional things you wish to save]
         outFile.close();
     } else {
