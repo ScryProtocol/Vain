@@ -1,18 +1,19 @@
 #!/bin/bash
 
-COMMAND="$@"
-
-if [ -z "$COMMAND" ]; then
-    echo "Please provide a command to run."
+# Check if any arguments were provided
+if [ "$#" -eq 0 ]; then
+    echo "Usage: $0 <command> [<args>...]"
     exit 1
 fi
 
+# Infinite loop
 while true; do
-    # Check if the program is running
-    if ! pgrep -f "$COMMAND" > /dev/null; then
-        # Start the program if not running
-        $COMMAND &
-    fi
-    # Wait for a minute before checking again
-    sleep 60
+    # Run the provided command and wait for it to finish
+    "$@" & PID=$!
+    
+    # Wait for the process to exit
+    wait $PID
+    
+    # Sleep for a short interval before attempting to restart
+    sleep 1
 done
