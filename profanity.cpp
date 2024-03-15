@@ -10,11 +10,14 @@
 #include <set>
 
 #if defined(__APPLE__) || defined(__MACOSX)
-#include <OpenCL/cl.h>
-#include <OpenCL/cl_ext.h> // Included to get topology to get an actual unique identifier per device
+#  include <OpenCL/cl.h>
+#  include <OpenCL/cl_ext.h> // Included to get topology to get an actual unique identifier per device
 #else
-#include <CL/cl.h>
-#include <CL/cl_ext.h> // Included to get topology to get an actual unique identifier per device
+#  include <CL/cl.h>
+#  include <CL/cl_ext.h> // Included to get topology to get an actual unique identifier per device
+//#  if defined(CL_DEVICE_TOPOLOGY_AMD)
+//#    include <hwloc/opencl.h> // Otherwise it won't certify as "Works On My Machine (TM)".
+//#  endif
 #endif
 
 #define CL_DEVICE_PCI_BUS_ID_NV  0x4008
@@ -115,10 +118,10 @@ std::vector<std::string> getBinaries(cl_program & clProgram) {
 
 unsigned int getUniqueDeviceIdentifier(const cl_device_id & deviceId) {
 #if defined(CL_DEVICE_TOPOLOGY_AMD)
-	auto topology = clGetWrapper<cl_device_topology_amd>(clGetDeviceInfo, deviceId, CL_DEVICE_TOPOLOGY_AMD);
-	if (topology.raw.type == CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD) {
-		return (topology.pcie.bus << 16) + (topology.pcie.device << 8) + topology.pcie.function;
-	}
+	//auto topology = clGetWrapper<hwloc_cl_device_topology_amd>(clGetDeviceInfo, deviceId, CL_DEVICE_TOPOLOGY_AMD);
+	//if (topology.raw.type == HWLOC_CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD) {
+	//	return (topology.pcie.bus << 16) + (topology.pcie.device << 8) + topology.pcie.function;
+	//}
 #endif
 	cl_int bus_id = clGetWrapper<cl_int>(clGetDeviceInfo, deviceId, CL_DEVICE_PCI_BUS_ID_NV);
 	cl_int slot_id = clGetWrapper<cl_int>(clGetDeviceInfo, deviceId, CL_DEVICE_PCI_SLOT_ID_NV);
@@ -160,6 +163,7 @@ int main(int argc, char * * argv) {
 		bool bModeRange = false;
 		bool bModeMirror = false;
 		bool bModeDoubles = false;
+		bool bModeCrack = false;
 		int rangeMin = 0;
 		int rangeMax = 0;
 		std::vector<size_t> vDeviceSkipIndex;
@@ -181,6 +185,7 @@ int main(int argc, char * * argv) {
 		argp.addSwitch('7', "range", bModeRange);
 		argp.addSwitch('8', "mirror", bModeMirror);
 		argp.addSwitch('9', "leading-doubles", bModeDoubles);
+		argp.addSwitch('k', "crack", bModeCrack);
 		argp.addSwitch('m', "min", rangeMin);
 		argp.addSwitch('M', "max", rangeMax);
 		argp.addMultiSwitch('s', "skip", vDeviceSkipIndex);
@@ -223,13 +228,15 @@ int main(int argc, char * * argv) {
 			mode = Mode::mirror();
 		} else if (bModeDoubles) {
 			mode = Mode::doubles();
+		} else if (bModeCrack) {
+			mode = Mode::crack();
 		} else {
 			std::cout << g_strHelp << std::endl;
 			return 0;
 		}
 		
 		if (strPublicKey.length() == 0) {
-			std::cout << "error: this tool requires your public key to derive it's private key security" << std::endl;
+			std::cout << "error: this tool requires a public key to derive it's private key" << std::endl;
 			return 1;
 		}
 
@@ -242,6 +249,8 @@ int main(int argc, char * * argv) {
 
 		if (bMineContract) {
 			mode.target = CONTRACT;
+		} else if (bModeCrack) {
+			mode.target = PRIVATE_KEY;
 		} else {
 			mode.target = ADDRESS;
 		}
