@@ -97,7 +97,14 @@ static void printResult(cl_ulong4 seed, cl_ulong round, result r, cl_uchar score
 	// Print
 	const std::string strVT100ClearLine = "\33[2K\r";
 	std::cout << strVT100ClearLine << "  Time: " << std::setw(5) << seconds << "s Score: " << std::setw(2) << (int) score << " Private: 0x" << strPrivate << ' ';
-
+std::ofstream outFile("output.txt", std::ios::app); // open file in append mode
+    if (outFile) {
+        outFile << "\n"<< "  Time: " << std::setw(5) << seconds << "s Score: " << std::setw(2) << (int) score << " Private: 0x" << strPrivate << ' '<< mode.transformName()<< ": 0x" << strPublic << std::endl;
+        // ... [any additional things you wish to save]
+        outFile.close();
+    } else {
+        std::cerr << "Error opening file for writing!" << std::endl;
+    }
 	std::cout << mode.transformName();
 	std::cout << ": 0x" << strPublic << std::endl;
 }
@@ -437,6 +444,9 @@ void Dispatcher::handleResult(Device & d) {
 	for (auto i = PROFANITY_MAX_SCORE; i > m_clScoreMax; --i) {
 		result & r = d.m_memResult[i];
 
+		
+
+		
 		if (r.found > 0 && i >= d.m_clScoreMax) {
 			d.m_clScoreMax = i;
 			CLMemory<cl_uchar>::setKernelArg(d.m_kernelScore, 4, d.m_clScoreMax);
